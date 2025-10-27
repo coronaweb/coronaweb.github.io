@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="es">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pase de Salida</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+        }
+        .loading-spinner {
+            border: 2px solid #f3f4f6;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .toast.success {
+            background-color: #10b981;
+        }
+        .toast.error {
+            background-color: #ef4444;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body id="main-body" class="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100" style="background-image: url('https://www.cervezacorona.es/wp-content/uploads/2025/05/el-ritual-de-la-lima-step-3.webp'); background-size: cover; background-position: center; background-attachment: fixed;">
+  <main class="container mx-auto px-4 py-8 max-w-4xl"><!-- Navigation Tabs -->
+   <div class="bg-white rounded-xl shadow-lg mb-8">
+    <div class="flex border-b border-gray-200"><button id="tab-form" class="flex-1 py-4 px-6 text-center font-semibold text-blue-600 border-b-2 border-blue-600 bg-blue-50 transition-colors"> 📝 Formulario </button> <button id="tab-records" class="flex-1 py-4 px-6 text-center font-semibold text-gray-500 hover:text-gray-700 transition-colors"> 📋 Registros </button>
+    </div>
+   </div><!-- Form Page -->
+   <div id="page-form" class="page-content"><!-- Form Content -->
+    <div id="form-content" class="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
+     <div class="text-center mb-8">
+      <h1 id="form-title" class="text-3xl font-bold text-gray-800">Pase de Salida</h1>
+     </div>
+     <form id="registroForm" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+       <div><label for="fecha" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label> <input type="date" id="fecha" name="fecha" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+       </div>
+       <div><label for="hora" class="block text-sm font-medium text-gray-700 mb-2">Hora</label> <input type="time" id="hora" name="hora" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+       </div>
+      </div>
+      <div><label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">Nombre</label> <input type="text" id="nombre" name="nombre" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" placeholder="Ingrese el nombre completo">
+      </div>
+      <div><label for="area_departamento" class="block text-sm font-medium text-gray-700 mb-2">Área/Departamento</label> <input type="text" id="area_departamento" name="area_departamento" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" placeholder="Ingrese el área o departamento">
+      </div>
+      <div><label for="lugar" class="block text-sm font-medium text-gray-700 mb-2">Lugar</label> <input type="text" id="lugar" name="lugar" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" placeholder="Ingrese el lugar">
+      </div>
+      <div><label for="acompanantes" class="block text-sm font-medium text-gray-700 mb-2">Acompañante(s)</label> <input type="text" id="acompanantes" name="acompanantes" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" placeholder="Ingrese los acompañantes (opcional)">
+      </div>
+      <div><label for="observaciones" class="block text-sm font-medium text-gray-700 mb-2">Observaciones</label> <textarea id="observaciones" name="observaciones" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none" placeholder="Ingrese observaciones adicionales"></textarea>
+      </div>
+      <div class="space-y-4">
+       <h3 class="text-lg font-semibold text-gray-800">Tipo de Asunto</h3>
+       <div class="flex flex-col space-y-3"><label class="flex items-center space-x-3 cursor-pointer"> <input type="radio" id="comision_oficial" name="tipo_asunto" value="comision_oficial" class="w-5 h-5 text-blue-600 border-2 border-gray-300 focus:ring-2 focus:ring-blue-500"> <span class="text-gray-700 font-medium">Comisión Oficial</span> </label> <label class="flex items-center space-x-3 cursor-pointer"> <input type="radio" id="asunto_particular" name="tipo_asunto" value="asunto_particular" class="w-5 h-5 text-blue-600 border-2 border-gray-300 focus:ring-2 focus:ring-blue-500"> <span class="text-gray-700 font-medium">Asunto Particular</span> </label>
+       </div>
+      </div>
+      <div class="space-y-4">
+       <div><label for="password_confirm" class="block text-sm font-medium text-gray-700 mb-2">Contraseña para guardar</label> <input type="password" id="password_confirm" name="password_confirm" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" placeholder="Ingrese la contraseña para guardar el registro">
+       </div>
+       <div id="password-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+        Contraseña incorrecta. No se puede guardar el registro.
+       </div><button type="submit" id="submit-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"> <span id="submit-text">Guardar Registro</span>
+        <div id="loading-spinner" class="loading-spinner hidden"></div></button>
+      </div>
+     </form>
+    </div>
+   </div><!-- Records Page -->
+   <div id="page-records" class="page-content hidden">
+    <div class="bg-white rounded-xl shadow-lg p-8">
+     <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-gray-800">Registros Guardados</h2>
+      <div class="text-sm text-gray-500">
+       Total: <span id="records-count">0</span> registros
+      </div>
+     </div>
+     <div id="records-list" class="space-y-4">
+      <p class="text-gray-500 text-center py-8">No hay registros guardados aún</p>
+     </div>
+    </div>
+   </div>
+  </main>
+  <script>
+        let currentRecords = [];
+        let recordCount = 0;
+        
+        const defaultConfig = {
+            form_title: "Pase de Salida",
+            submit_button_text: "Guardar Registro",
+            background_image_url: "https://www.cervezacorona.es/wp-content/uploads/2025/05/el-ritual-de-la-lima-step-3.webp",
+            primary_color: "#2563eb",
+            surface_color: "#ffffff",
+            text_color: "#1f2937"
+        };
+
+        const dataHandler = {
+            onDataChanged(data) {
+                currentRecords = data;
+                recordCount = data.length;
+                renderRecords(data);
+            }
+        };
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        function setLoadingState(isLoading) {
+            const submitButton = document.getElementById('submit-button');
+            const submitText = document.getElementById('submit-text');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            
+            submitButton.disabled = isLoading;
+            if (isLoading) {
+                loadingSpinner.classList.remove('hidden');
+                submitText.textContent = 'Guardando...';
+            } else {
+                loadingSpinner.classList.add('hidden');
+                submitText.textContent = window.elementSdk?.config?.submit_button_text || defaultConfig.submit_button_text;
+            }
+        }
+
+        function initializeFormFields() {
+            // Establecer fecha actual
+            const fechaInput = document.getElementById('fecha');
+            if (fechaInput && !fechaInput.value) {
+                const today = new Date().toISOString().split('T')[0];
+                fechaInput.value = today;
+            }
+            
+            // Establecer hora actual
+            const horaInput = document.getElementById('hora');
+            if (horaInput && !horaInput.value) {
+                const now = new Date();
+                const currentTime = now.toTimeString().slice(0, 5);
+                horaInput.value = currentTime;
+            }
+        }
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            // Show selected page
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            
+            // Update tab styles
+            document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+                tab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+                tab.classList.add('text-gray-500');
+            });
+            
+            const activeTab = document.getElementById(`tab-${pageId}`);
+            activeTab.classList.remove('text-gray-500');
+            activeTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+            
+            // Initialize form fields when showing form page
+            if (pageId === 'form') {
+                initializeFormFields();
+            }
+        }
+
+        function renderRecords(records) {
+            const recordsList = document.getElementById('records-list');
+            const recordsCount = document.getElementById('records-count');
+            
+            recordsCount.textContent = records.length;
+            
+            if (records.length === 0) {
+                recordsList.innerHTML = '<p class="text-gray-500 text-center py-8">No hay registros guardados aún</p>';
+                return;
+            }
+            
+            recordsList.innerHTML = records.map(record => `
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <span class="font-semibold text-gray-700">Fecha:</span>
+                            <span class="text-gray-600 ml-2">${record.fecha}</span>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-700">Hora:</span>
+                            <span class="text-gray-600 ml-2">${record.hora}</span>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-700">Nombre:</span>
+                            <span class="text-gray-600 ml-2">${record.nombre}</span>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-700">Área/Departamento:</span>
+                            <span class="text-gray-600 ml-2">${record.area_departamento}</span>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-700">Lugar:</span>
+                            <span class="text-gray-600 ml-2">${record.lugar}</span>
+                        </div>
+                        ${record.acompanantes ? `
+                        <div>
+                            <span class="font-semibold text-gray-700">Acompañante(s):</span>
+                            <span class="text-gray-600 ml-2">${record.acompanantes}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${record.observaciones ? `
+                        <div class="mb-4">
+                            <span class="font-semibold text-gray-700">Observaciones:</span>
+                            <p class="text-gray-600 mt-1">${record.observaciones}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="flex flex-wrap gap-2">
+                        ${record.comision_oficial ? '<span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">Comisión Oficial</span>' : ''}
+                        ${record.asunto_particular ? '<span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Asunto Particular</span>' : ''}
+                    </div>
+                    
+                    <div class="mt-4 flex justify-between items-center">
+                        <div class="text-xs text-gray-400">
+                            Registrado: ${new Date(record.fecha_creacion).toLocaleString('es-ES')}
+                        </div>
+                        <button onclick="handleDeleteRecord('${record.__backendId}')" 
+                                class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-lg transition-colors duration-200 flex items-center space-x-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            <span>Eliminar</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showPasswordError() {
+            const errorDiv = document.getElementById('password-error');
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 4000);
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            if (recordCount >= 999) {
+                showToast('Se ha alcanzado el límite máximo de 999 registros. Por favor, contacte al administrador.', 'error');
+                return;
+            }
+            
+            const formData = new FormData(event.target);
+            const enteredPassword = formData.get('password_confirm');
+            
+            // Verificar contraseña antes de proceder
+            if (enteredPassword !== "123456") {
+                showPasswordError();
+                showToast('Contraseña incorrecta', 'error');
+                return;
+            }
+            
+            setLoadingState(true);
+            
+            const tipoAsunto = formData.get('tipo_asunto');
+            const registro = {
+                fecha: formData.get('fecha'),
+                nombre: formData.get('nombre'),
+                area_departamento: formData.get('area_departamento'),
+                lugar: formData.get('lugar'),
+                acompanantes: formData.get('acompanantes') || '',
+                hora: formData.get('hora'),
+                observaciones: formData.get('observaciones') || '',
+                comision_oficial: tipoAsunto === 'comision_oficial',
+                asunto_particular: tipoAsunto === 'asunto_particular',
+                fecha_creacion: new Date().toISOString()
+            };
+            
+            const result = await window.dataSdk.create(registro);
+            
+            setLoadingState(false);
+            
+            if (result.isOk) {
+                showToast('Registro guardado exitosamente', 'success');
+                event.target.reset();
+                // Reinicializar campos de fecha y hora después del reset
+                initializeFormFields();
+                // Automatically switch to records page after successful submission
+                setTimeout(() => showPage('records'), 1000);
+            } else {
+                showToast('Error al guardar el registro. Inténtelo nuevamente.', 'error');
+            }
+        }
+
+        async function handleDeleteRecord(recordId) {
+            // Encontrar el registro por ID
+            const recordToDelete = currentRecords.find(record => record.__backendId === recordId);
+            if (!recordToDelete) {
+                showToast('Error: No se pudo encontrar el registro', 'error');
+                return;
+            }
+
+            // Mostrar campo de contraseña
+            const deleteButton = document.querySelector(`button[onclick="handleDeleteRecord('${recordId}')"]`);
+            const originalContent = deleteButton.innerHTML;
+            
+            deleteButton.innerHTML = `
+                <div class="flex flex-col space-y-2 w-full">
+                    <span class="text-xs text-center">Ingrese contraseña para eliminar:</span>
+                    <div class="flex space-x-2">
+                        <input type="password" id="delete-password-${recordId}" placeholder="Contraseña" 
+                               class="flex-1 px-2 py-1 text-xs border border-gray-300 rounded text-black">
+                        <button onclick="confirmDeleteWithPassword('${recordId}')" 
+                                class="bg-red-700 hover:bg-red-800 px-2 py-1 rounded text-xs">Eliminar</button>
+                        <button onclick="cancelDelete('${recordId}')" 
+                                class="bg-gray-500 hover:bg-gray-600 px-2 py-1 rounded text-xs">Cancelar</button>
+                    </div>
+                    <div id="delete-error-${recordId}" class="hidden text-xs text-red-300 text-center">Contraseña incorrecta</div>
+                </div>
+            `;
+            deleteButton.onclick = null;
+            
+            // Guardar el contenido original para restaurar si se cancela
+            deleteButton.dataset.originalContent = originalContent;
+            
+            // Enfocar el campo de contraseña
+            setTimeout(() => {
+                const passwordInput = document.getElementById(`delete-password-${recordId}`);
+                if (passwordInput) {
+                    passwordInput.focus();
+                    // Permitir eliminar con Enter
+                    passwordInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            confirmDeleteWithPassword(recordId);
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        async function confirmDeleteWithPassword(recordId) {
+            const passwordInput = document.getElementById(`delete-password-${recordId}`);
+            const errorDiv = document.getElementById(`delete-error-${recordId}`);
+            const enteredPassword = passwordInput.value;
+            
+            // Verificar contraseña (contraseña fija: 123456)
+            if (enteredPassword !== "123456") {
+                errorDiv.classList.remove('hidden');
+                passwordInput.value = '';
+                passwordInput.focus();
+                setTimeout(() => {
+                    errorDiv.classList.add('hidden');
+                }, 3000);
+                return;
+            }
+            
+            const recordToDelete = currentRecords.find(record => record.__backendId === recordId);
+            if (!recordToDelete) {
+                showToast('Error: No se pudo encontrar el registro', 'error');
+                return;
+            }
+
+            const deleteButton = document.querySelector(`button[onclick*="${recordId}"]`);
+            deleteButton.innerHTML = `
+                <div class="loading-spinner"></div>
+                <span class="ml-2">Eliminando...</span>
+            `;
+            deleteButton.disabled = true;
+
+            const result = await window.dataSdk.delete(recordToDelete);
+            
+            if (result.isOk) {
+                showToast('Registro eliminado exitosamente', 'success');
+            } else {
+                showToast('Error al eliminar el registro', 'error');
+                // Restaurar el botón si hay error
+                const originalContent = deleteButton.dataset.originalContent;
+                deleteButton.innerHTML = originalContent;
+                deleteButton.disabled = false;
+                deleteButton.onclick = () => handleDeleteRecord(recordId);
+            }
+        }
+
+        function cancelDelete(recordId) {
+            const deleteButton = document.querySelector(`button[onclick*="${recordId}"]`);
+            const originalContent = deleteButton.dataset.originalContent;
+            deleteButton.innerHTML = originalContent;
+            deleteButton.onclick = () => handleDeleteRecord(recordId);
+        }
+
+        async function onConfigChange(config) {
+            const formTitle = document.getElementById('form-title');
+            const submitText = document.getElementById('submit-text');
+            const mainBody = document.getElementById('main-body');
+            
+            formTitle.textContent = config.form_title || defaultConfig.form_title;
+            if (!document.getElementById('submit-button').disabled) {
+                submitText.textContent = config.submit_button_text || defaultConfig.submit_button_text;
+            }
+            
+            // Actualizar imagen de fondo
+            const backgroundUrl = config.background_image_url || defaultConfig.background_image_url;
+            if (backgroundUrl) {
+                mainBody.style.backgroundImage = `url('${backgroundUrl}')`;
+                mainBody.style.backgroundSize = 'cover';
+                mainBody.style.backgroundPosition = 'center';
+                mainBody.style.backgroundAttachment = 'fixed';
+            } else {
+                mainBody.style.backgroundImage = '';
+            }
+        }
+
+        function mapToCapabilities(config) {
+            return {
+                recolorables: [
+                    {
+                        get: () => config.primary_color || defaultConfig.primary_color,
+                        set: (value) => {
+                            config.primary_color = value;
+                            window.elementSdk.setConfig({ primary_color: value });
+                        }
+                    },
+                    {
+                        get: () => config.surface_color || defaultConfig.surface_color,
+                        set: (value) => {
+                            config.surface_color = value;
+                            window.elementSdk.setConfig({ surface_color: value });
+                        }
+                    },
+                    {
+                        get: () => config.text_color || defaultConfig.text_color,
+                        set: (value) => {
+                            config.text_color = value;
+                            window.elementSdk.setConfig({ text_color: value });
+                        }
+                    }
+                ],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            };
+        }
+
+        function mapToEditPanelValues(config) {
+            return new Map([
+                ["form_title", config.form_title || defaultConfig.form_title],
+                ["submit_button_text", config.submit_button_text || defaultConfig.submit_button_text],
+                ["background_image_url", config.background_image_url || defaultConfig.background_image_url]
+            ]);
+        }
+
+        async function initializeApp() {
+            if (window.dataSdk) {
+                const initResult = await window.dataSdk.init(dataHandler);
+                if (!initResult.isOk) {
+                    showToast('Error al inicializar la aplicación', 'error');
+                }
+            }
+
+            if (window.elementSdk) {
+                await window.elementSdk.init({
+                    defaultConfig,
+                    onConfigChange,
+                    mapToCapabilities,
+                    mapToEditPanelValues
+                });
+            }
+
+            document.getElementById('registroForm').addEventListener('submit', handleSubmit);
+            
+            // Setup navigation
+            document.getElementById('tab-form').addEventListener('click', () => showPage('form'));
+            document.getElementById('tab-records').addEventListener('click', () => showPage('records'));
+            
+            // Initialize form fields on page load
+            initializeFormFields();
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'995317b070f66dba',t:'MTc2MTU3NzUzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
